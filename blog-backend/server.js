@@ -25,11 +25,14 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "None", // ✅ cross-site Netlify ↔ Render
+      secure: true,
+      httpOnly: true,
     },
   })
 );
+
 
 //app.use(session(...));
 app.use(passport.initialize());
