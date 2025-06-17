@@ -17,6 +17,8 @@ const Login = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const { login } = useContext(UserContext);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -37,6 +39,28 @@ const Login = () => {
     } catch (err) {
       console.error("❌ Google Login Error:", err);
       toast.error("Google Login Failed!");
+    }
+  };
+  const handleManualLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(
+        "https://blog-backend-bqf8.onrender.com/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      login(data.user); // 👈 store to context
+      setIsLoggedIn(true);
+      setTimeout(() => navigate("/dashboard"), 2000);
+    } catch (err) {
+      toast.error(err.message);
     }
   };
 
@@ -66,7 +90,7 @@ const Login = () => {
         />
       ) : (
         <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md animate-fade-in">
-             <GoBackButton />
+          <GoBackButton />
           {/* 🌀 Top Animation */}
           <div className="flex justify-center mb-6">
             <Lottie
@@ -91,13 +115,13 @@ const Login = () => {
             Login to Zidio Blog
           </h2>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleManualLogin}>
             <div>
               <label className="block mb-1 text-sm font-semibold text-gray-700">
                 Email
               </label>
               <input
-                type="email"
+                value={email} onChange={(e) => setEmail(e.target.value)} type="email" required
                 placeholder="you@example.com"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
@@ -108,7 +132,7 @@ const Login = () => {
                 Password
               </label>
               <input
-                type="password"
+                value={password} onChange={(e) => setPassword(e.target.value)} type="password" required
                 placeholder="••••••••"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400"
               />

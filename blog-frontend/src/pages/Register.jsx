@@ -31,11 +31,48 @@ const Register = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setTimeout(() => {
+
+    const passwordChecks = {
+      length: formData.password.length >= 8,
+      uppercase: /[A-Z]/.test(formData.password),
+      lowercase: /[a-z]/.test(formData.password),
+      number: /[0-9]/.test(formData.password),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),
+    };
+
+    const isStrong = Object.values(passwordChecks).every(Boolean);
+    if (!isStrong) {
+      return toast.error("❌ Please meet all password strength requirements");
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      return toast.error("❌ Passwords do not match");
+    }
+
+    try {
+      const res = await fetch(
+        "https://blog-backend-bqf8.onrender.com/api/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            fullName: formData.fullName,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Registration failed");
       setSubmitted(true);
-    }, 800);
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
 
   const handleGoogleSuccess = (credentialResponse) => {

@@ -13,7 +13,7 @@ router.post("/login", login);
 router.get("/logout", (req, res, next) => {
   req.logout(function (err) {
     if (err) {
-      return next(err);
+      return next(err)
     }
 
     res.clearCookie("session"); // ✅ if cookie-session used
